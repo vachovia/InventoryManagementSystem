@@ -1,0 +1,16 @@
+﻿@if (Inventory is not null)
+{
+    <tr>
+        <td>@Inventory.InventoryName</td>
+        <td>@Inventory.Quantity</td>
+        <td>@Inventory.Price.ToString("c")</td>
+        <td>
+            <a href="/editinventory/@Inventory.InventoryId" class="btn btn-light">Edit</a>
+        </td>
+    </tr>
+}
+
+@code {
+    [Parameter]
+    public Inventory? Inventory { get; set; }
+}

@@ -1,0 +1,63 @@
+﻿@page "/editinventory/{invId:int}"
+
+@inject IEditInventoryUseCase EditInventoryUseCase;
+@inject IViewInventoryByIdUseCase ViewInventoryByIdUseCase;
+@inject NavigationManager NavigationManager;
+
+<h3>Edit Inventory @invId</h3>
+<br />
+
+@if (inventory is not null)
+{
+    <EditForm Model="inventory" FormName="formInventory" OnValidSubmit="Update">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <InputNumber @bind-Value="inventory.InventoryId" hidden></InputNumber>
+        <div class="form-group">
+            <label for="name">Inventory Name</label>
+            <InputText id="name" @bind-Value="inventory.InventoryName" class="form-control"></InputText>
+            <ValidationMessage For="() => inventory.InventoryName"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <InputNumber id="quantity" @bind-Value="inventory.Quantity" class="form-control"></InputNumber>
+            <ValidationMessage For="() => inventory.Quantity"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <InputNumber id="price" @bind-Value="inventory.Price" class="form-control"></InputNumber>
+            <ValidationMessage For="() => inventory.Price"></ValidationMessage>
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary">Update</button>&nbsp;
+        <a href="/inventories" class="btn btn-outline-secondary">Cancel</a>
+    </EditForm>
+}
+
+
+
+@code {
+    [Parameter]
+    public int invId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Inventory? inventory { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // we put ?? because while posting it goes to same /editinventory url
+        // and fetches same inventory and overrides edited form values
+        // it goes through same life cycle and calls OnParametersSetAsync again
+        inventory ??= await ViewInventoryByIdUseCase.ExecuteAsync(invId);
+    }
+
+    private async Task Update()
+    {
+        if(inventory is not null)
+        {
+            await EditInventoryUseCase.ExecuteAsync(inventory);
+
+            NavigationManager.NavigateTo("/inventories");
+        }        
+    }
+}
