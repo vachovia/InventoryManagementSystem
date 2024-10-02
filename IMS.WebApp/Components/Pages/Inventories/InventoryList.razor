@@ -3,12 +3,17 @@
 <h3>Inventory List</h3>
 <br />
 <br />
-
-<InventoryListComponent></InventoryListComponent>
+<SearchComponent OnSearch="HandleSearch"></SearchComponent>
 <br />
-
+<InventoryListComponent SearchInventoryFilter="@inventoryNameToSearch"></InventoryListComponent>
+<br />
 <a href="/addinventory" class="btn btn-primary">Add Inventory</a>
 
 @code {
+    private string? inventoryNameToSearch { get; set; }
 
+    private void HandleSearch(string searchFilter)
+    {
+        inventoryNameToSearch = searchFilter;
+    }
 }

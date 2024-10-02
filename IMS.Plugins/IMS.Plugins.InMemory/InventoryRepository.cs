@@ -20,16 +20,14 @@ namespace IMS.Plugins.InMemory
 
         public async Task<IEnumerable<Inventory>> GetInventoriesByNameAsync(string name)
         {
-            if(string.IsNullOrEmpty(name))
+            if(string.IsNullOrWhiteSpace(name))
             {
                 return await Task.FromResult(_inventories);
             }
 
-            _inventories = _inventories.Where(
+            return _inventories.Where(
                 i => i.InventoryName.Contains(name, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-
-            return _inventories;
+            );
         }
 
         public Task AddInventoryAsync(Inventory inventory)
@@ -76,6 +74,18 @@ namespace IMS.Plugins.InMemory
             var inventory = _inventories.First(i => i.InventoryId == inventoryId);
 
             return Task.FromResult(inventory);
+        }
+
+        public Task DeleteInventoryByIdAsync(int inventoryId)
+        {
+            var inventory = _inventories.FirstOrDefault(i => i.InventoryId == inventoryId);
+
+            if(inventory != null)
+            {
+                _inventories.Remove(inventory);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

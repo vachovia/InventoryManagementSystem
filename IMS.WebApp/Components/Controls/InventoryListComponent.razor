@@ -7,6 +7,7 @@
             <th>Quantity</th>
             <th>Price</th>
             <th></th>
+            <th style="text-align:left"></th>
         </tr>
     </thead>
     <tbody>
@@ -23,8 +24,11 @@
 @code {
     private List<Inventory>? inventories;
 
-    protected override async Task OnInitializedAsync()
+    [Parameter]
+    public string? SearchInventoryFilter { get; set; }
+
+    protected override async Task OnParametersSetAsync()
     {
-        inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync()).ToList();
+        inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync(SearchInventoryFilter??string.Empty)).ToList();
     }
 }

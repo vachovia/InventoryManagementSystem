@@ -45,9 +45,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        // we put ?? because while posting it goes to same /editinventory url
+        // we use ??= because while POST it goes to the same /editinventory url
         // and fetches same inventory and overrides edited form values
         // it goes through same life cycle and calls OnParametersSetAsync again
+        // If inventory form fulfilled then don't GET inventory from repository
         inventory ??= await ViewInventoryByIdUseCase.ExecuteAsync(invId);
     }
 

@@ -1,4 +1,7 @@
-﻿@if (Inventory is not null)
+﻿@inject IDeleteInventoryUseCase DeleteInventoryUseCase;
+@inject NavigationManager NavigationManager;
+
+@if (Inventory is not null)
 {
     <tr>
         <td>@Inventory.InventoryName</td>
@@ -7,10 +10,22 @@
         <td>
             <a href="/editinventory/@Inventory.InventoryId" class="btn btn-light">Edit</a>
         </td>
+        <td>
+            <EditForm Enhance="true" Model="Inventory" FormName="@($"form-delete-inventory-{Inventory.InventoryId}")" OnValidSubmit="() => DeleteInventory(Inventory.InventoryId)">
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
+            </EditForm>
+        </td>
     </tr>
 }
 
 @code {
     [Parameter]
     public Inventory? Inventory { get; set; }
+
+    private async Task DeleteInventory(int inventoryId)
+    {
+        await DeleteInventoryUseCase.ExecuteAsync(inventoryId);
+        // used it to refresh list with partial reload
+        NavigationManager.Refresh();
+    }
 }
