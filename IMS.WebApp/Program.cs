@@ -1,21 +1,32 @@
 using IMS.Plugins.InMemory;
-using IMS.UseCases.Inventories;
-using IMS.UseCases.Inventories.Interfaces;
 using IMS.UseCases.PluginInterfaces;
 using IMS.WebApp.Components;
+using IMS.UseCases.Inventories;
+using IMS.UseCases.Inventories.Interfaces;
+using IMS.UseCases.Products;
+using IMS.UseCases.Products.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents();
+
+// builder.Services.AddRazorComponents(); **********
+// This was done for Delete Product from Product List
+// with @rendermode="InteractiveServer" where Component used
+// No Http Request simply used SignalR channel
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
 builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
 builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
 builder.Services.AddTransient<IEditInventoryUseCase, EditInventoryUseCase>();
 builder.Services.AddTransient<IViewInventoryByIdUseCase, ViewInventoryByIdUseCase>();
 builder.Services.AddTransient<IDeleteInventoryUseCase, DeleteInventoryUseCase>();
+
+builder.Services.AddTransient<IViewProductsByNameUseCase, ViewProductsByNameUseCase>();
+builder.Services.AddTransient<IDeleteProductUseCase, DeleteProductUseCase>();
 
 var app = builder.Build();
 
@@ -30,6 +41,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>();
+// app.MapRazorComponents<App>(); ************
+// This was done for Delete Product from Product List
+// with @rendermode="InteractiveServer" where Component used
+// No Http Request simply used SignalR channel
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
