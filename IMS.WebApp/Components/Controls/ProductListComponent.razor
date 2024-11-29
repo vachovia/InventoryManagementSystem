@@ -13,9 +13,9 @@
     <tbody>
         @if (products is not null && products.Count > 0)
         {
-            foreach (var prod in products)
+            foreach (var product in products)
             {
-                <ProductListItemComponent @rendermode="InteractiveServer" Product="prod"></ProductListItemComponent>
+                <ProductListItemComponent @rendermode="InteractiveServer" Product="product"></ProductListItemComponent>
             }
         }
     </tbody>

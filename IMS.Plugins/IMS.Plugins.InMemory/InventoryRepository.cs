@@ -73,7 +73,15 @@ namespace IMS.Plugins.InMemory
         {
             var inventory = _inventories.First(i => i.InventoryId == inventoryId);
 
-            return Task.FromResult(inventory);
+            var newInventory = new Inventory
+            {
+                InventoryId = inventory.InventoryId,
+                InventoryName = inventory.InventoryName,
+                Quantity = inventory.Quantity,
+                Price = inventory.Price                
+            };
+
+            return Task.FromResult(newInventory);
         }
 
         public Task DeleteInventoryByIdAsync(int inventoryId)

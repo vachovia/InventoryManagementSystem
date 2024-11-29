@@ -62,6 +62,7 @@ namespace IMS.Plugins.InMemory
                 prodToUpdate.ProductName = product.ProductName;
                 prodToUpdate.Quantity = product.Quantity;
                 prodToUpdate.Price = product.Price;
+                prodToUpdate.ProductInventories = product.ProductInventories;
             }
 
             return Task.CompletedTask;
@@ -70,6 +71,41 @@ namespace IMS.Plugins.InMemory
         public Task<Product> GetProductByIdAsync(int productId)
         {
             var product = _products.First(i => i.ProductId == productId);
+
+            var newProduct = new Product
+            {
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                ProductInventories = new List<ProductInventory>()
+            };
+
+            if(product.ProductInventories != null && product.ProductInventories.Count > 0)
+            {
+                foreach(var prodInv in product.ProductInventories)
+                {
+                    var newProdInv = new ProductInventory
+                    {
+                        ProductId = prodInv.ProductId,
+                        InventoryId = prodInv.InventoryId,
+                        Product = product,
+                        Inventory = new Inventory(),
+                        InventoryQuantity = prodInv.InventoryQuantity,
+
+                    };
+
+                    if(prodInv.Inventory != null)
+                    {
+                        newProdInv.Inventory.InventoryId = prodInv.Inventory.InventoryId;
+                        newProdInv.Inventory.InventoryName = prodInv.Inventory.InventoryName;
+                        newProdInv.Inventory.Price = prodInv.Inventory.Price;
+                        newProdInv.Inventory.Quantity = prodInv.Inventory.Quantity;
+                    }
+
+                    newProduct.ProductInventories.Add(newProdInv);
+                }
+            }
 
             return Task.FromResult(product);
         }

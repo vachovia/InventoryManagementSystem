@@ -11,7 +11,7 @@
         <ul>
             @foreach (var inv in inventories)
             {
-                <li @key="@inv.InventoryId">
+                <li @key="@inv.InventoryId" @onclick="() => { HandleSelectInventory(inv); }">
                     @inv.InventoryName
                 </li>
             }
@@ -22,10 +22,14 @@
 @* For regular input we use @bind-value with lower case 'v' *@
 
 @code {
+
+    [Parameter]
+    public EventCallback<Inventory> OnInventorySelected { get; set; }
+
     private string? _searchFilter;
     private string searchFilter
     {
-        get => _searchFilter;
+        get => _searchFilter ?? string.Empty;
         set
         {
             _searchFilter = value;
@@ -40,5 +44,11 @@
         await Task.Delay(2000); // UI already rendered and after 2 secs it will not update UI so why we use StateHasChanged
         inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync(searchFilter)).ToList();
         StateHasChanged();
+    }
+
+    private async Task HandleSelectInventory(Inventory inventory)
+    {
+        await OnInventorySelected.InvokeAsync(inventory);
+        inventories.Clear();
     }
 }

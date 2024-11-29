@@ -29,9 +29,9 @@
         <ValidationMessage For="() => product.Price"></ValidationMessage>
     </div>
     <div class="form-group">
-        <label for="inventories">Inventories</label>
-        <SearchProductInventoriesComponent></SearchProductInventoriesComponent>
-    </div>
+        <label>Inventories</label>
+        <ProductInventoriesComponent Product="product"></ProductInventoriesComponent>
+    </div>    
     <br/>
     <button type="submit" class="btn btn-primary">Save</button>&nbsp;
     <a href="/products" class="btn btn-outline-secondary">Cancel</a>
