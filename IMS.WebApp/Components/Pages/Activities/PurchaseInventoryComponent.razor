@@ -10,12 +10,12 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
 <h3>Purchase Inventory</h3>
 <br/>
 
-<EditForm Model="purchaseViewModel" OnValidSubmit="Purchase">
+<EditForm Model="purchaseViewModel">
     <DataAnnotationsValidator></DataAnnotationsValidator>
     <ValidationSummary></ValidationSummary>
     <div class="form-group">
         <label for="po">Purchase Order #</label>
-        <InputText id="po" class="form-control" @bind-Value=purchaseViewModel.PONumber></InputText>
+        <InputText id="po" class="form-control" @bind-Value=purchaseViewModel.PONumber autocomplete="off"></InputText>
     </div>
     <br/>
     <div class="card">
@@ -33,10 +33,10 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
     <br />
     <div class="form-group">
         <label for="qty">Quantity</label>
-        <InputNumber id="qty" class="form-control" @bind-Value=purchaseViewModel.QuantityToPurchase></InputNumber>
+        <InputNumber id="qty" class="form-control" @bind-Value=purchaseViewModel.QuantityToPurchase autocomplete="off"></InputNumber>
     </div>
     <br/>
-    <button type="submit" class="btn btn-primary">Purchase</button>
+    <button type="button" class="btn btn-primary" @onclick="Purchase">Purchase</button>
 </EditForm>
 <br />
 
@@ -67,8 +67,11 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
 
     private async Task Purchase()
     {
-        await PurchaseInventoryUseCase.ExecuteAsync(purchaseViewModel.PONumber, selectedInventory, purchaseViewModel.QuantityToPurchase, "Vlad");
-        purchaseViewModel = new();
-        selectedInventory = null;
+        if (selectedInventory is not null)
+        {
+            await PurchaseInventoryUseCase.ExecuteAsync(purchaseViewModel.PONumber, selectedInventory, purchaseViewModel.QuantityToPurchase, "Vlad");
+            purchaseViewModel = new();
+            selectedInventory = null;
+        }        
     }
 }
