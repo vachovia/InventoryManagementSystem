@@ -12,3 +12,6 @@
 .search-result li {
     cursor: pointer;
 }
+.search-result .selected{
+    background-color: antiquewhite;
+}

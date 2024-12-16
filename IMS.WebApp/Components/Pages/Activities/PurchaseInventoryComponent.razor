@@ -3,15 +3,48 @@
 @rendermode InteractiveServer
 @* We cannoit specify Interactive Server as an attribute for AutoCompleteComponent like @rendermode="InteractiveServer"
 because page is in Blazor SSR mode while Auto Complete in Interactive, so why this entire component made Interactive*@
-
 @inject IViewInventoriesByNameUseCase ViewInventoriesByNameUseCase;
+@inject IViewInventoryByIdUseCase ViewInventoryByIdUseCase;
+@inject IPurchaseInventoryUseCase PurchaseInventoryUseCase;
 
 <h3>Purchase Inventory</h3>
 <br/>
 
-<AutoCompleteComponent Label="Inventory" SearchFunction="SearchInventory"></AutoCompleteComponent>
+<EditForm Model="purchaseViewModel" OnValidSubmit="Purchase">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <ValidationSummary></ValidationSummary>
+    <div class="form-group">
+        <label for="po">Purchase Order #</label>
+        <InputText id="po" class="form-control" @bind-Value=purchaseViewModel.PONumber></InputText>
+    </div>
+    <br/>
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <AutoCompleteComponent Label="Inventory to Purchase" SearchFunction="SearchInventory" OnItemSelected="HandleItemSelected"></AutoCompleteComponent>
+                @if (purchaseViewModel.InventoryPrice > 0)
+                {
+                    <text>Price:</text>
+                    @purchaseViewModel.InventoryPrice.ToString("c")
+                }
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="qty">Quantity</label>
+        <InputNumber id="qty" class="form-control" @bind-Value=purchaseViewModel.QuantityToPurchase></InputNumber>
+    </div>
+    <br/>
+    <button type="submit" class="btn btn-primary">Purchase</button>
+</EditForm>
+<br />
 
 @code {
+    // private ItemViewModel? selectedItem;
+    private PurchaseViewModel purchaseViewModel = new();
+    private Inventory? selectedInventory = null;
+
     private List<ItemViewModel>? SearchInventory(string name)
     {
         var list = ViewInventoriesByNameUseCase.ExecuteAsync(name).GetAwaiter().GetResult();
@@ -21,5 +54,21 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
         var itemList = list.Select(inv => new ItemViewModel { Id = inv.InventoryId, Name = inv.InventoryName }).ToList();
 
         return itemList;
+    }
+
+    public async Task HandleItemSelected (ItemViewModel item)
+    {
+        // selectedItem = item;
+        selectedInventory = await ViewInventoryByIdUseCase.ExecuteAsync(item.Id);
+
+        purchaseViewModel.InventoryId = item.Id;
+        purchaseViewModel.InventoryPrice = selectedInventory.Price;
+    }
+
+    private async Task Purchase()
+    {
+        await PurchaseInventoryUseCase.ExecuteAsync(purchaseViewModel.PONumber, selectedInventory, purchaseViewModel.QuantityToPurchase, "Vlad");
+        purchaseViewModel = new();
+        selectedInventory = null;
     }
 }
