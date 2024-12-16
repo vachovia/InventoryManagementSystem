@@ -16,7 +16,7 @@ namespace IMS.CoreBusiness.Validations
                 {
                     var totalCost = TotalInventoriesCost(product);
 
-                    return new ValidationResult($"The product's price is less than the inventories cost: {totalCost.ToString("c")}", new List<string> { validationContext.MemberName ?? string.Empty});
+                    return new ValidationResult($"The product's price is less than the inventories cost: {totalCost.ToString("c")}", new List<string> { validationContext.MemberName ?? string.Empty });
                 }
             }
 

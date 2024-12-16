@@ -1,14 +1,15 @@
 using IMS.Plugins.InMemory;
 using IMS.UseCases.PluginInterfaces;
 using IMS.WebApp.Components;
+
 using IMS.UseCases.Inventories;
 using IMS.UseCases.Inventories.Interfaces;
 using IMS.UseCases.Products;
 using IMS.UseCases.Products.Interfaces;
-
+using IMS.UseCases.Activities;
+using IMS.UseCases.Activities.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // builder.Services.AddRazorComponents(); **********
 // This was done for Delete Product from Product List
@@ -18,6 +19,7 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
+builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
 
 builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
 builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
@@ -30,6 +32,8 @@ builder.Services.AddTransient<IDeleteProductUseCase, DeleteProductUseCase>();
 builder.Services.AddTransient<IAddProductUseCase, AddProductUseCase>();
 builder.Services.AddTransient<IViewProductByIdUseCase, ViewProductByIdUseCase>();
 builder.Services.AddTransient<IEditProductUseCase, EditProductUseCase>();
+
+builder.Services.AddTransient<IPurchaseInventoryUseCase, PurchaseInventoryUseCase>();
 
 var app = builder.Build();
 
