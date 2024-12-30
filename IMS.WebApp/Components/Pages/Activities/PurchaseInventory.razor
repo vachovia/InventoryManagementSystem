@@ -1,8 +1,12 @@
 ﻿@page "/purchase"
 
-@rendermode InteractiveServer
-@* We cannoit specify Interactive Server as an attribute for AutoCompleteComponent like @rendermode="InteractiveServer"
+@* We cannot specify Interactive Server as an attribute for AutoCompleteComponent like @rendermode="InteractiveServer"
 because page is in Blazor SSR mode while Auto Complete in Interactive, so why this entire component made Interactive*@
+@rendermode InteractiveServer
+
+@*It already available in Program.cs from AddRazorComponents()*@
+@inject IJSRuntime JSRuntime
+
 @inject IViewInventoriesByNameUseCase ViewInventoriesByNameUseCase;
 @inject IViewInventoryByIdUseCase ViewInventoryByIdUseCase;
 @inject IPurchaseInventoryUseCase PurchaseInventoryUseCase;
@@ -10,7 +14,7 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
 <h3>Purchase Inventory</h3>
 <br/>
 
-<EditForm Model="purchaseViewModel">
+<EditForm id="purchase-form" Model="purchaseViewModel" OnValidSubmit="Purchase">
     <DataAnnotationsValidator></DataAnnotationsValidator>
     <ValidationSummary></ValidationSummary>
     <div class="form-group">
@@ -36,14 +40,25 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
         <InputNumber id="qty" class="form-control" @bind-Value=purchaseViewModel.QuantityToPurchase autocomplete="off"></InputNumber>
     </div>
     <br/>
-    <button type="button" class="btn btn-primary" @onclick="Purchase">Purchase</button>
+    <button type="submit" class="btn btn-primary">Purchase</button>
 </EditForm>
 <br />
 
 @code {
     // private ItemViewModel? selectedItem;
+
     private PurchaseViewModel purchaseViewModel = new();
     private Inventory? selectedInventory = null;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (firstRender)
+        {
+            JSRuntime.InvokeVoidAsync("preventFormSubmission", "purchase-form");
+        }
+    }
 
     private List<ItemViewModel>? SearchInventory(string name)
     {
@@ -59,6 +74,7 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
     public async Task HandleItemSelected (ItemViewModel item)
     {
         // selectedItem = item;
+
         selectedInventory = await ViewInventoryByIdUseCase.ExecuteAsync(item.Id);
 
         purchaseViewModel.InventoryId = item.Id;

@@ -23,5 +23,22 @@ namespace IMS.Plugins.InMemory
 
             return Task.CompletedTask;
         }
+
+        public Task ProduceInventoryAsync(string productionNumber, Inventory inventory, int quantityToConsume, string doneBy, double price)
+        {
+            _inventoryTransactions.Add(new InventoryTransaction
+            {
+                ProductionNumber = productionNumber,
+                InventoryId = inventory.InventoryId,
+                QuantityBefore = inventory.Quantity,
+                QuantityAfter = inventory.Quantity - quantityToConsume,
+                ActivityType = InventoryTransactionType.ProduceProduct,
+                TransactionDate = DateTime.UtcNow,
+                DoneBy = doneBy,
+                UnitPrice = price
+            });
+
+            return Task.CompletedTask;
+        }
     }
 }

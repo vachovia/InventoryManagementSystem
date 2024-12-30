@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IMS.CoreBusiness
 {
@@ -24,6 +19,7 @@ namespace IMS.CoreBusiness
         [Required]
         public string DoneBy { get; set; } = string.Empty;
         public string PONumber { get; set; } = string.Empty;
+        public string ProductionNumber { get; set; } = string.Empty;
         public  Inventory? Inventory { get; set; }
     }
 }
