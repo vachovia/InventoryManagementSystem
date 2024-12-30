@@ -60,9 +60,9 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
         }
     }
 
-    private List<ItemViewModel>? SearchInventory(string name)
+    private async Task<List<ItemViewModel>?> SearchInventory(string name)
     {
-        var list = ViewInventoriesByNameUseCase.ExecuteAsync(name).GetAwaiter().GetResult();
+        var list = await ViewInventoriesByNameUseCase.ExecuteAsync(name);
 
         if (list is null) return null;
 

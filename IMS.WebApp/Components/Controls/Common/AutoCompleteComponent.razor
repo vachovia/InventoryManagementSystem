@@ -25,7 +25,7 @@
     [Parameter]
     public string Label { get; set; } = "Search";
     [Parameter]
-    public Func<string, List<ItemViewModel>>? SearchFunction { get; set; }
+    public Func<string, Task<List<ItemViewModel>>>? SearchFunction { get; set; }
     // similar to Func<string, List<ItemViewModel>>
     // public delegate List<ItemViewModel> SearchFunction(string searchFilter);
     [Parameter]
@@ -44,9 +44,18 @@
 
             if (!string.IsNullOrEmpty(_userInput) && SearchFunction is not null)
             {
-                searchResults = SearchFunction(_userInput);
+                ViewItemsAsync();
             }
+        }
+    }
 
+    private async Task ViewItemsAsync()
+    {
+        if (SearchFunction is not null)
+        {
+            searchResults = await SearchFunction(_userInput);
+
+            StateHasChanged();
         }
     }
 
