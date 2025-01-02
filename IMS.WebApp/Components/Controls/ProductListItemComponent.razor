@@ -7,10 +7,10 @@
         <td>@Product.Quantity</td>
         <td>@Product.Price.ToString("c")</td>
         <td>
-            <a href="/editproduct/@Product.ProductId" class="btn btn-light">Edit</a>
+            <a href="/editproduct/@Product.ProductId" class="btn btn-primary">Edit</a>
         </td>
         <td>
-            <button type="button" class="btn btn-light" @onclick="async() => { await DeleteProduct(Product.ProductId); }">Delete</button>
+            <button type="button" class="btn btn-danger" @onclick="async() => { await DeleteProduct(Product.ProductId); }">Delete</button>
         </td>
     </tr>
 }

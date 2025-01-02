@@ -7,5 +7,7 @@ namespace IMS.UseCases.PluginInterfaces
         Task PurchaseInventoryAsync(string poNumber, Inventory inventory, int quantity, string doneBy, double price);
 
         Task ProduceInventoryAsync(string poNumber, Inventory inventory, int quantityToConsume, string doneBy, double price);
+
+        Task<IEnumerable<InventoryTransaction>> GetInventoryTransactionsAsync(string inventoryName, DateTime? dateFrom, DateTime? dateTo, InventoryTransactionType? transactionType);
     }
 }
