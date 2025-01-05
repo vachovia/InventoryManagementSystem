@@ -4,25 +4,25 @@ using IMS.UseCases.Reports.Interfaces;
 
 namespace IMS.UseCases.Reports
 {
-    public class SearchInventoryTransactionsUseCase : ISearchInventoryTransactionsUseCase
+    public class SearchProductTransactionsUseCase : ISearchProductTransactionsUseCase
     {
-        private readonly IInventoryTransactionRepository _inventoryTransactionRepository;
+        private readonly IProductTransactionRepository _productTransactionRepository;
 
-        public SearchInventoryTransactionsUseCase(IInventoryTransactionRepository inventoryTransactionRepository)
+        public SearchProductTransactionsUseCase(IProductTransactionRepository productTransactionRepository)
         {
-            _inventoryTransactionRepository = inventoryTransactionRepository;
+            _productTransactionRepository = productTransactionRepository;
         }
 
-        public async Task<IEnumerable<InventoryTransaction>> ExecuteAsync(string inventoryName, DateTime? dateFrom, DateTime? dateTo, InventoryTransactionType? transactionType)
+        public async Task<IEnumerable<ProductTransaction>> ExecuteAsync(string productName, DateTime? dateFrom, DateTime? dateTo, ProductTransactionType? transactionType)
         {
             if (dateTo.HasValue)
             {
                 dateTo = dateTo.Value.AddDays(1);
             }
 
-            var inventoryTransactions = await _inventoryTransactionRepository.GetInventoryTransactionsAsync(inventoryName, dateFrom, dateTo, transactionType);
+            var productTransactions = await _productTransactionRepository.GetProductTransactionsAsync(productName, dateFrom, dateTo, transactionType);
 
-            return inventoryTransactions;
+            return productTransactions;
         }
     }
 }

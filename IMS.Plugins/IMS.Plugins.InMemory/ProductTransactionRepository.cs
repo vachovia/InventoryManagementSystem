@@ -66,5 +66,32 @@ namespace IMS.Plugins.InMemory
 
             return Task.CompletedTask;
         }
+
+        public async Task<IEnumerable<ProductTransaction>> GetProductTransactionsAsync(string productName, DateTime? dateFrom, DateTime? dateTo, ProductTransactionType? transactionType)
+        {
+            var products = (await _productRepository.GetProductsByNameAsync(string.Empty)).ToList();
+
+            var query = from p in _productTransactions
+                        join prod in products on p.ProductId equals prod.ProductId
+                        where (string.IsNullOrWhiteSpace(productName) || prod.ProductName.ToLower().IndexOf(productName.ToLower()) >= 0)
+                        && (!dateFrom.HasValue || p.TransactionDate >= dateFrom.Value.Date)
+                        && (!dateTo.HasValue || p.TransactionDate <= dateTo.Value.Date)
+                        && (!transactionType.HasValue || p.ActivityType == transactionType)
+                        select new ProductTransaction
+                        {
+                            Product = prod,
+                            ProductTransactionId = p.ProductTransactionId,
+                            ProductionNumber = p.ProductionNumber,
+                            SONumber = p.SONumber,
+                            ProductId = p.ProductId,
+                            QuantityBefore = p.QuantityBefore,
+                            ActivityType = p.ActivityType,
+                            QuantityAfter = p.QuantityAfter,
+                            TransactionDate = p.TransactionDate,
+                            DoneBy = p.DoneBy,
+                            UnitPrice = p.UnitPrice
+                        };
+            return query;
+        }
     }
 }
