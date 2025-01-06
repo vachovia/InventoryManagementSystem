@@ -1,5 +1,6 @@
 ﻿using IMS.CoreBusiness.Validations;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IMS.CoreBusiness
 {
@@ -9,6 +10,7 @@ namespace IMS.CoreBusiness
 
         [Required]
         [StringLength(150)]
+        [Column(TypeName = "nvarchar(160)")]
         public string ProductName { get; set; } = string.Empty;
 
         [Range(0, int.MaxValue, ErrorMessage = "Quantity must be greator or equal to {1}")]

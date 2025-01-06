@@ -41,22 +41,42 @@
     public int invId { get; set; }
 
     [SupplyParameterFromForm]
-    private Inventory? inventory { get; set; }
+    private InventoryViewModel? inventory { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        // we use ??= because while POST it goes to the same /editinventory url
-        // and fetches same inventory and overrides edited form values
-        // it goes through same life cycle and calls OnParametersSetAsync again
-        // If inventory form fulfilled then don't GET inventory from repository
-        inventory ??= await ViewInventoryByIdUseCase.ExecuteAsync(invId);
+        if(inventory is null)
+        {
+            // we use ??= because while POST it goes to the same /editinventory url
+            // and fetches same inventory and overrides edited form values
+            // it goes through same life cycle and calls OnParametersSetAsync again
+            // If inventory form fulfilled then don't GET inventory from repository
+            // inventory ??= await ViewInventoryByIdUseCase.ExecuteAsync(invId);
+            var inv = await ViewInventoryByIdUseCase.ExecuteAsync(invId);
+
+            inventory = new InventoryViewModel
+            {
+                InventoryId = inv.InventoryId,
+                InventoryName = inv.InventoryName,
+                Price = inv.Price,
+                Quantity = inv.Quantity
+            };
+        }        
     }
 
     private async Task Update()
     {
         if(inventory is not null)
         {
-            await EditInventoryUseCase.ExecuteAsync(inventory);
+            var inv = new Inventory
+            {
+                InventoryId = inventory.InventoryId,
+                InventoryName = inventory.InventoryName,
+                Price = inventory.Price,
+                Quantity = inventory.Quantity
+            };
+
+            await EditInventoryUseCase.ExecuteAsync(inv);
 
             NavigationManager.NavigateTo("/inventories");
         }        

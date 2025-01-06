@@ -10,8 +10,13 @@ using IMS.UseCases.Activities;
 using IMS.UseCases.Activities.Interfaces;
 using IMS.UseCases.Reports.Interfaces;
 using IMS.UseCases.Reports;
+using IMS.Plugins.EFCoreSql;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // builder.Services.AddRazorComponents(); **********
 // This was done for Delete Product from Product List
@@ -19,10 +24,23 @@ var builder = WebApplication.CreateBuilder(args);
 // No Http Request simply used SignalR channel
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
-builder.Services.AddSingleton<IProductRepository, ProductRepository>();
-builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
-builder.Services.AddSingleton<IProductTransactionRepository, ProductTransactionRepository>();
+// This we keep for testing
+if(builder.Environment.IsEnvironment("Testing"))
+{
+    // because "Testing" is not built-in Environment so why wwwroot files are not loaded
+    // StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+    builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+    builder.Services.AddSingleton<IProductRepository, ProductRepository>();
+    builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
+    builder.Services.AddSingleton<IProductTransactionRepository, ProductTransactionRepository>();
+}
+else
+{
+    builder.Services.AddTransient<IInventoryRepository, InventoryRepositoryEF>();
+    builder.Services.AddTransient<IProductRepository, ProductRepositoryEF>();
+    builder.Services.AddTransient<IInventoryTransactionRepository, InventoryTransactionRepositoryEF>();
+    builder.Services.AddTransient<IProductTransactionRepository, ProductTransactionRepositoryEF>();
+}
 
 builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
 builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
@@ -63,3 +81,8 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
+
+
+// To run migration for EFCore we need to make WebApp as a start-up project and as a default project specify IMSPlugins.EFCoreSql
+// InMemory Plugin was still attached while runing migrations
+// Then in EFCore plugin we have to re-create Repository files
