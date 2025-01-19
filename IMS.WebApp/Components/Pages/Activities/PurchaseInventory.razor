@@ -2,6 +2,8 @@
 
 @attribute [Authorize]
 
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+
 @* We cannot specify Interactive Server as an attribute for AutoCompleteComponent like @rendermode="InteractiveServer"
 because page is in Blazor SSR mode while Auto Complete in Interactive, so why this entire component made Interactive*@
 @rendermode InteractiveServer
@@ -52,6 +54,13 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
     private PurchaseViewModel purchaseViewModel = new();
     private Inventory? selectedInventory = null;
 
+    private AuthenticationState? authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
@@ -85,9 +94,17 @@ because page is in Blazor SSR mode while Auto Complete in Interactive, so why th
 
     private async Task Purchase()
     {
+        string userName = string.Empty;
+        var isUserAuthenticated = authState?.User?.Identity?.IsAuthenticated;
+
+        if (isUserAuthenticated.HasValue && isUserAuthenticated.Value)
+        {
+            userName = authState?.User?.Identity?.Name ?? string.Empty;
+        }
+
         if (selectedInventory is not null)
         {
-            await PurchaseInventoryUseCase.ExecuteAsync(purchaseViewModel.PONumber, selectedInventory, purchaseViewModel.QuantityToPurchase, "Vlad");
+            await PurchaseInventoryUseCase.ExecuteAsync(purchaseViewModel.PONumber, selectedInventory, purchaseViewModel.QuantityToPurchase, userName);
             purchaseViewModel = new();
             selectedInventory = null;
         }        

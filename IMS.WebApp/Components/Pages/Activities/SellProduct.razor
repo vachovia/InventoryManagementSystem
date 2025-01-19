@@ -2,6 +2,8 @@
 
 @attribute [Authorize]
 
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+
 @rendermode InteractiveServer
 
 @inject IJSRuntime JSRuntime
@@ -47,6 +49,13 @@
     private SellViewModel sellViewModel = new();
     private Product? selectedProduct;
 
+    private AuthenticationState? authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
@@ -79,9 +88,17 @@
 
     private async Task Sell()
     {
+        string userName = string.Empty;
+        var isUserAuthenticated = authState?.User?.Identity?.IsAuthenticated;
+
+        if (isUserAuthenticated.HasValue && isUserAuthenticated.Value)
+        {
+            userName = authState?.User?.Identity?.Name ?? string.Empty;
+        }
+
         if (selectedProduct is not null)
         {
-            await SellProductUseCase.ExecuteAsync(sellViewModel.SalesOrderNumber, selectedProduct, sellViewModel.QuantityToSell, sellViewModel.UnitPrice, "Vlad");
+            await SellProductUseCase.ExecuteAsync(sellViewModel.SalesOrderNumber, selectedProduct, sellViewModel.QuantityToSell, sellViewModel.UnitPrice, userName);
             sellViewModel = new();
             selectedProduct = null;
         }

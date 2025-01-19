@@ -2,6 +2,8 @@
 
 @attribute [Authorize]
 
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+
 @rendermode InteractiveServer
 
 @inject IJSRuntime JSRuntime
@@ -42,6 +44,13 @@
     private ProduceViewModel produceViewModel = new();
     private Product? selectedProduct;
 
+    private AuthenticationState? authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
@@ -75,9 +84,17 @@
 
     private async Task Produce()
     {
+        string userName = string.Empty;
+        var isUserAuthenticated = authState?.User?.Identity?.IsAuthenticated;
+
+        if (isUserAuthenticated.HasValue && isUserAuthenticated.Value)
+        {
+            userName = authState?.User?.Identity?.Name ?? string.Empty;
+        }
+
         if (selectedProduct is not null)
         {
-            await ProduceProductUseCase.ExecuteAsync(produceViewModel.ProductionNumber, selectedProduct, produceViewModel.QuantityToProduce, "Vlad");
+            await ProduceProductUseCase.ExecuteAsync(produceViewModel.ProductionNumber, selectedProduct, produceViewModel.QuantityToProduce, userName);
             produceViewModel = new();
             selectedProduct = null;
         }
