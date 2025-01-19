@@ -13,10 +13,13 @@ using IMS.UseCases.Reports;
 using IMS.Plugins.EFCoreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using IMS.WebApp.Components.Account;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.Identity;
+using IMS.WebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // builder.Services.AddRazorComponents(); **********
 // This was done for Delete Product from Product List
@@ -24,11 +27,43 @@ builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer
 // No Http Request simply used SignalR channel
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
+// Services for Identity /////////////////////////////////////////////////////////////////////////
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+.AddIdentityCookies();
+
+var imsConnectionString = builder.Configuration.GetConnectionString("IMSAccounts");
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(imsConnectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddIdentityCore<ApplicationUser>(
+    options => options.SignIn.RequireConfirmedAccount = true
+)
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddSignInManager()
+.AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer(connectionString));
+
 // This we keep for testing
 if(builder.Environment.IsEnvironment("Testing"))
 {
     // because "Testing" is not built-in Environment so why wwwroot files are not loaded
-    // StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+    // StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration); // not needed
     builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
     builder.Services.AddSingleton<IProductRepository, ProductRepository>();
     builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
@@ -63,7 +98,11 @@ builder.Services.AddTransient<ISearchProductTransactionsUseCase, SearchProductTr
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint(); // from added diagnostic package
+}
+else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
@@ -80,9 +119,15 @@ app.UseAntiforgery();
 // No Http Request simply used SignalR channel
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
+// also added which is required by the Identity /Account Razor Components
+app.MapAdditionalIdentityEndpoints();
+
 app.Run();
 
 
 // To run migration for EFCore we need to make WebApp as a start-up project and as a default project specify IMSPlugins.EFCoreSql
 // InMemory Plugin was still attached while runing migrations
 // Then in EFCore plugin we have to re-create Repository files
+
+// To run migration after adding second context we need to specify DbContext
+// Update-Database -Context ApplicationDbContext

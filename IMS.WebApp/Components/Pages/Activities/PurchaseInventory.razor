@@ -1,5 +1,7 @@
 ﻿@page "/purchase"
 
+@attribute [Authorize]
+
 @* We cannot specify Interactive Server as an attribute for AutoCompleteComponent like @rendermode="InteractiveServer"
 because page is in Blazor SSR mode while Auto Complete in Interactive, so why this entire component made Interactive*@
 @rendermode InteractiveServer
