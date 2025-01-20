@@ -33,7 +33,15 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Sales", policy => policy.RequireClaim("Department", "Sales"));
+    options.AddPolicy("Admin", policy => policy.RequireClaim("Department", "Administration"));
+    options.AddPolicy("Purchasers", policy => policy.RequireClaim("Department", "Purchasing"));
+    options.AddPolicy("Inventory", policy => policy.RequireClaim("Department", "InventoryManagement"));
+    options.AddPolicy("Productions", policy => policy.RequireClaim("Department", "ProductionManagement"));
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -55,7 +63,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-///
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer(connectionString));
 
@@ -63,7 +71,7 @@ builder.Services.AddDbContextFactory<IMSContext>(options => options.UseSqlServer
 if(builder.Environment.IsEnvironment("Testing"))
 {
     // because "Testing" is not built-in Environment so why wwwroot files are not loaded
-    // StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration); // not needed
+    StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration); // not needed ???
     builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
     builder.Services.AddSingleton<IProductRepository, ProductRepository>();
     builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
@@ -71,6 +79,7 @@ if(builder.Environment.IsEnvironment("Testing"))
 }
 else
 {
+    StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
     builder.Services.AddTransient<IInventoryRepository, InventoryRepositoryEF>();
     builder.Services.AddTransient<IProductRepository, ProductRepositoryEF>();
     builder.Services.AddTransient<IInventoryTransactionRepository, InventoryTransactionRepositoryEF>();
@@ -120,6 +129,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // also added which is required by the Identity /Account Razor Components
+// comes with scaffolded project
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();

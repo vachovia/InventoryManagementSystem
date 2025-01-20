@@ -1,6 +1,6 @@
 ﻿@page "/sell"
 
-@attribute [Authorize]
+@attribute [Authorize(Policy = "Sales")]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 

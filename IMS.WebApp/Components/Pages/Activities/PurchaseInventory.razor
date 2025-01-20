@@ -1,6 +1,6 @@
 ﻿@page "/purchase"
 
-@attribute [Authorize]
+@attribute [Authorize(Policy = "Purchasers")]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 
